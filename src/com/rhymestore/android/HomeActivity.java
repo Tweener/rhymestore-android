@@ -4,19 +4,9 @@ import greendroid.app.GDActivity;
 import greendroid.widget.ActionBarItem;
 import greendroid.widget.NormalActionBarItem;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,10 +18,10 @@ import android.speech.tts.TextToSpeech.OnInitListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.rhymestore.android.api.APIManager;
 import com.rhymestore.android.rhymes.Rhyme;
+import com.rhymestore.android.rhymes.RhymeService;
+import com.rhymestore.android.utils.Utils;
 
 public class HomeActivity extends GDActivity implements OnInitListener, OnClickListener
 {
@@ -40,6 +30,8 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
     private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
     private ArrayList<String> matches;
+
+    private RhymeService rhymeService;
 
     private Button mSpeakButton;
 
@@ -53,10 +45,13 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
 
         setActionBarContentView(R.layout.home);
 
+        mSpeakButton = (Button) findViewById(R.id.btn_speak);
+
+        // Initialize the rhyme service
+        rhymeService = new RhymeService(this);
+
         // Enable TextToSpeech
         textToSpeech = new TextToSpeech(this, this);
-
-        mSpeakButton = (Button) findViewById(R.id.btn_speak);
 
         // Check to see if a recognition activity is present
         checkRecognizerPresence();
@@ -107,7 +102,7 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
             if (result == TextToSpeech.LANG_MISSING_DATA
                 || result == TextToSpeech.LANG_NOT_SUPPORTED)
             {
-                shortAlert("Language is not available.");
+                Utils.AlertShort(HomeActivity.this, "Language is not available.");
             }
             else
             {
@@ -116,7 +111,7 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
         }
         else
         {
-            shortAlert("Could not initialize TextToSpeech.");
+            Utils.AlertShort(HomeActivity.this, "Could not initialize TextToSpeech.");
         }
     }
 
@@ -137,13 +132,15 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
     {
         try
         {
-            Rhyme responseRhyme = getRhymeFromAPI(text);
+            Rhyme responseRhyme = rhymeService.getRhymeFromAPI(text);
+
             speechTheRhyme(responseRhyme.getText());
-            shortAlert(responseRhyme.getText());
+
+            Utils.AlertShort(HomeActivity.this, responseRhyme.getText());
         }
         catch (Exception ex)
         {
-            shortAlert("Error getting the rhyme: " + ex.getMessage());
+            Utils.AlertShort(HomeActivity.this, "Error getting the rhyme: " + ex.getMessage());
         }
     }
 
@@ -177,7 +174,7 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
             }
             else
             {
-                shortAlert("No result, try again !");
+                Utils.AlertShort(HomeActivity.this, "No result, try again !");
             }
             // mList.setAdapter(new ArrayAdapter<String>(this,
             // android.R.layout.simple_list_item_1,
@@ -187,78 +184,13 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void shortAlert(final String msg)
-    {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    private Rhyme getRhymeFromAPI(final String text) throws Exception
-    {
-        try
-        {
-            APIManager.getInstance().setLogin("rimamelo");
-            APIManager.getInstance().setPass("R1m4mel0");
-
-            String url = APIManager.BASE_URL + "?model.rhyme=" + text;
-            InputStream in = APIManager.getInstance().sendGetRequest(url);
-            InputSource ipsrc = new InputSource(in);
-
-            // Parse the XML
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(ipsrc);
-            doc.getDocumentElement().normalize();
-
-            // Manage results from the XML to get the rhymes
-            NodeList rhymeNodes = doc.getElementsByTagName("rhyme");
-
-            if (rhymeNodes.getLength() > 0)
-            {
-                Node rhymeNode = rhymeNodes.item(0);
-                String currentValue = rhymeNode.getTextContent();
-                if (currentValue != null)
-                {
-                    return new Rhyme(currentValue);
-                }
-
-                // if (rhymeNode.getNodeType() == Node.ELEMENT_NODE)
-                // {
-                // Element eElement = (Element) rhymeNode;
-                //
-                // String currentValue = getTagValue("rhyme", eElement);
-                // if (currentValue != null)
-                // {
-                // return new Rhyme(currentValue);
-                // }
-                // }
-            }
-            else
-            {
-                StringBuilder errors = new StringBuilder();
-                NodeList errorNodes = doc.getElementsByTagName("error");
-
-                for (int i = 0; i < errorNodes.getLength(); i++)
-                {
-                    errors.append(errorNodes.item(i).getTextContent());
-                    errors.append(". ");
-                }
-
-                shortAlert(errors.toString());
-            }
-
-            return null;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.getMessage());
-        }
-    }
-
     private void checkRecognizerPresence()
     {
         PackageManager pm = getPackageManager();
+
         List<ResolveInfo> activities =
             pm.queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+
         if (activities.size() != 0)
         {
             mSpeakButton.setOnClickListener(this);
@@ -268,22 +200,5 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
             mSpeakButton.setEnabled(false);
             mSpeakButton.setText("Recognizer not present");
         }
-    }
-
-    /**
-     * Get the tag value of the current rhyme
-     * 
-     * @param tag Name of the tag
-     * @param element Element to check
-     * @return Value of the tag
-     * @deprecated Use {@link Node#getTextContent()}
-     */
-    @Deprecated
-    private static String getTagValue(final String tag, final Element element)
-    {
-        NodeList nlList = element.getElementsByTagName(tag).item(0).getChildNodes();
-        Node nValue = nlList.item(0);
-
-        return nValue.getNodeValue();
     }
 }
