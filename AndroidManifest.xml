@@ -4,53 +4,35 @@
       android:versionCode="1"
       android:versionName="1.0">
 
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-    
-		<activity android:name=".SplashScreenActivity"
-        		  android:screenOrientation="portrait"
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="4"/>
+
+    <application
+        android:icon="@drawable/icon"
+        android:name=".RhymestoreApplication"
+        android:theme="@style/Theme.GDCatalog"
+        android:label="@string/app_name">
+        
+        <uses-library android:name="com.google.android.maps" />
+
+        <!-- First activity to launch -->
+        <activity android:name=".SplashScreenActivity"
+                  android:screenOrientation="portrait"
                   android:theme="@android:style/Theme.NoTitleBar"
                   android:label="@string/app_name">
+                  
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity"
-        		  android:theme="@android:style/Theme.NoTitleBar"
-                  android:label="@string/login_name">
-                  
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.BROWSABLE" />
-				<data android:scheme="rhymestore" android:host="twitter"/>
-			</intent-filter>
-        </activity>
-
-        <activity android:name=".HomeActivity"
-        		  android:theme="@android:style/Theme.NoTitleBar"
-                  android:label="@string/home_name">
-        </activity>
-
-<!-- 
-        <service android:name="authenticator.AccountAuthenticatorService"
-				 android:exported="true" android:process=":auth">
-			<intent-filter>
-				<action android:name="android.accounts.AccountAuthenticator" />
-			</intent-filter>
-			<meta-data android:name="android.accounts.AccountAuthenticator"
-					   android:resource="@xml/authenticator" />
-		</service>
- -->		
+        <!-- All activities -->
+        <activity android:name=".HomeActivity" />
+        
     </application>
-    
-	<uses-permission android:name="android.permission.INTERNET" />
-	<!-- 
-	<uses-permission android:name="android.permission.USE_CREDENTIALS" />
-	<uses-permission android:name="android.permission.GET_ACCOUNTS" />
-	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
-	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-	 -->
 </manifest>

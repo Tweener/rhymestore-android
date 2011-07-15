@@ -21,7 +21,7 @@ import org.apache.http.protocol.HTTP;
 
 import android.util.Base64;
 
-import com.rhymestore.android.util.SSLUtils;
+import com.rhymestore.android.utils.SSLUtils;
 
 public class APIManager
 {

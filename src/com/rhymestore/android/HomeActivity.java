@@ -1,5 +1,9 @@
 package com.rhymestore.android;
 
+import greendroid.app.GDActivity;
+import greendroid.widget.ActionBarItem;
+import greendroid.widget.NormalActionBarItem;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +18,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -30,7 +33,7 @@ import android.widget.Toast;
 import com.rhymestore.android.api.APIManager;
 import com.rhymestore.android.rhymes.Rhyme;
 
-public class HomeActivity extends Activity implements OnInitListener, OnClickListener
+public class HomeActivity extends GDActivity implements OnInitListener, OnClickListener
 {
     private TextToSpeech textToSpeech;
 
@@ -44,7 +47,11 @@ public class HomeActivity extends Activity implements OnInitListener, OnClickLis
     public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home);
+
+        addActionBarItem(getActionBar().newActionBarItem(NormalActionBarItem.class).setDrawable(
+            R.drawable.ic_action_bar_help), R.id.action_bar_help);
+
+        setActionBarContentView(R.layout.home);
 
         // Enable TextToSpeech
         textToSpeech = new TextToSpeech(this, this);
@@ -53,6 +60,30 @@ public class HomeActivity extends Activity implements OnInitListener, OnClickLis
 
         // Check to see if a recognition activity is present
         checkRecognizerPresence();
+    }
+
+    @Override
+    public boolean onHandleActionBarItemClick(final ActionBarItem item, final int position)
+    {
+        if (item.getItemId() == R.id.action_bar_help)
+        {
+            try
+            {
+                // Intent intent = new Intent(this, HelpActivity.class);
+                // intent.putExtra(ActionBarActivity.GD_ACTION_BAR_TITLE, "Help");
+                // startActivity(intent);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return super.onHandleActionBarItemClick(item, position);
+        }
     }
 
     /**

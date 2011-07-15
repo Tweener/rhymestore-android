@@ -3,14 +3,13 @@ package com.rhymestore.android;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
+
+import com.rhymestore.android.utils.Utils;
 
 public class SplashScreenActivity extends Activity
 {
     /** SplashScreen display time (in ms) **/
     private final int welcomeScreenDisplay = 3000;
-
-    private Thread mAuthThread;
 
     /** Called when the activity is first created. */
     @Override
@@ -39,7 +38,7 @@ public class SplashScreenActivity extends Activity
                 }
                 catch (Exception e)
                 {
-                    alert("e : " + e.getMessage());
+                    Utils.AlertShort(SplashScreenActivity.this, e.getMessage());
                 }
                 finally
                 {
@@ -54,10 +53,5 @@ public class SplashScreenActivity extends Activity
 
         // Start SplashScreen thread
         welcomeThread.start();
-    }
-
-    private void alert(final String msg)
-    {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

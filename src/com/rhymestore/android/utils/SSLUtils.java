@@ -1,4 +1,4 @@
-package com.rhymestore.android.util;
+package com.rhymestore.android.utils;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
