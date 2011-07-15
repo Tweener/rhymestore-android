@@ -210,18 +210,40 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
             doc.getDocumentElement().normalize();
 
             // Manage results from the XML to get the rhymes
-            NodeList nList = doc.getElementsByTagName("rhyme");
+            NodeList rhymeNodes = doc.getElementsByTagName("rhyme");
 
-            Node nNode = nList.item(0);
-            if (nNode.getNodeType() == Node.ELEMENT_NODE)
+            if (rhymeNodes.getLength() > 0)
             {
-                Element eElement = (Element) nNode;
-
-                String currentValue = getTagValue("rhyme", eElement);
+                Node rhymeNode = rhymeNodes.item(0);
+                String currentValue = rhymeNode.getTextContent();
                 if (currentValue != null)
                 {
                     return new Rhyme(currentValue);
                 }
+
+                // if (rhymeNode.getNodeType() == Node.ELEMENT_NODE)
+                // {
+                // Element eElement = (Element) rhymeNode;
+                //
+                // String currentValue = getTagValue("rhyme", eElement);
+                // if (currentValue != null)
+                // {
+                // return new Rhyme(currentValue);
+                // }
+                // }
+            }
+            else
+            {
+                StringBuilder errors = new StringBuilder();
+                NodeList errorNodes = doc.getElementsByTagName("error");
+
+                for (int i = 0; i < errorNodes.getLength(); i++)
+                {
+                    errors.append(errorNodes.item(i).getTextContent());
+                    errors.append(". ");
+                }
+
+                shortAlert(errors.toString());
             }
 
             return null;
@@ -254,7 +276,9 @@ public class HomeActivity extends GDActivity implements OnInitListener, OnClickL
      * @param tag Name of the tag
      * @param element Element to check
      * @return Value of the tag
+     * @deprecated Use {@link Node#getTextContent()}
      */
+    @Deprecated
     private static String getTagValue(final String tag, final Element element)
     {
         NodeList nlList = element.getElementsByTagName(tag).item(0).getChildNodes();
